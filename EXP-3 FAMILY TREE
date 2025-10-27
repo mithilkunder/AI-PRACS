@@ -1,0 +1,161 @@
+% ---------- FACTS ----------
+
+% Male members
+male(john).
+male(michael).
+male(steve).
+male(david).
+male(chris).
+
+% Female members
+female(linda).
+female(susan).
+female(karen).
+female(emma).
+female(sophia).
+
+% Parent relationships
+parent(john, michael).
+parent(john, susan).
+parent(linda, michael).
+parent(linda, susan).
+
+parent(michael, steve).
+parent(michael, emma).
+parent(karen, steve).
+parent(karen, emma).
+
+parent(susan, david).
+parent(susan, sophia).
+parent(chris, david).
+parent(chris, sophia).
+
+% ---------- RULES ----------
+
+% father(X, Y): X is the father of Y
+father(X, Y) :- male(X), parent(X, Y).
+
+% mother(X, Y): X is the mother of Y
+mother(X, Y) :- female(X), parent(X, Y).
+
+% sibling(X, Y): X and Y share at least one parent
+sibling(X, Y) :-
+    parent(Z, X),
+    parent(Z, Y),
+    X \= Y.
+
+% brother(X, Y)
+brother(X, Y) :-
+    male(X),
+    sibling(X, Y).
+
+% sister(X, Y)
+sister(X, Y) :-
+    female(X),
+    sibling(X, Y).
+
+% grandfather(X, Y)
+grandfather(X, Y) :-
+    male(X),
+    parent(X, Z),
+    parent(Z, Y).
+
+% grandmother(X, Y)
+grandmother(X, Y) :-
+    female(X),
+    parent(X, Z),
+    parent(Z, Y).
+
+% uncle(X, Y)
+uncle(X, Y) :-
+    male(X),
+    sibling(X, Z),
+    parent(Z, Y).
+
+% aunt(X, Y)
+aunt(X, Y) :-
+    female(X),
+    sibling(X, Z),
+    parent(Z, Y).
+
+% cousin(X, Y)
+cousin(X, Y) :-
+    parent(Z, X),
+    parent(W, Y),
+    sibling(Z, W).
+
+% haschild(X): true if X has at least one child
+haschild(X) :-
+    parent(X, _).
+
+# Commands to run this program
+
+consult('path').
+
+1. Basic Relationship Queries
+?- male(john).
+?- female(linda).
+?- parent(john, michael).
+?- parent(susan, sophia).
+
+2. Father / Mother Relationships
+?- father(john, susan).
+?- father(michael, steve).
+?- mother(linda, michael).
+?- mother(karen, emma).
+?- mother(susan, david).
+
+👫 3. Sibling, Brother, Sister
+?- sibling(michael, susan).
+?- sibling(steve, emma).
+?- brother(michael, susan).
+?- brother(david, sophia).
+?- sister(susan, michael).
+?- sister(emma, steve).
+
+👴 4. Grandparents
+?- grandfather(john, steve).
+?- grandfather(michael, david).
+?- grandmother(linda, steve).
+?- grandmother(susan, sophia).
+
+🧔‍♂️👩‍🦱 5. Uncle / Aunt
+?- uncle(michael, david).
+?- uncle(steve, sophia).
+?- aunt(susan, emma).
+?- aunt(karen, michael).
+
+👨‍👧‍👦 6. Cousins
+?- cousin(steve, david).
+?- cousin(steve, sophia).
+?- cousin(emma, david).
+?- cousin(emma, sophia).
+
+👶 7. Has Child
+?- haschild(john).
+?- haschild(linda).
+?- haschild(michael).
+?- haschild(steve).   % false
+?- haschild(X).       % lists everyone who has children
+
+🧠 8. Find All Possible Answers (using variables)
+These show all relationships that exist, not just one.
+?- father(X, Y).       % all father-child pairs
+?- mother(X, Y).       % all mother-child pairs
+?- sibling(X, Y).      % all sibling pairs
+?- grandfather(X, Y).  % all grandfather-grandchild pairs
+?- grandmother(X, Y).  % all grandmother-grandchild pairs
+?- uncle(X, Y).        % all uncle relationships
+?- aunt(X, Y).         % all aunt relationships
+?- cousin(X, Y).       % all cousin relationships
+Use ; (semicolon) after each result to see the next one.
+
+🔍 9. Sample Logical Questions
+Try asking Prolog to deduce complex relations:
+?- father(X, emma).           % Who is Emma’s father?
+?- mother(X, steve).          % Who is Steve’s mother?
+?- grandfather(X, david).     % Who is David’s grandfather?
+?- aunt(X, emma).             % Who is Emma’s aunt?
+?- cousin(X, david).          % Who are David’s cousins?
+?- haschild(X).               % Who has children?
+
