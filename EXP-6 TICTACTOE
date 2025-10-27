@@ -175,7 +175,7 @@ mark(X) :-
 
 
 # Commands to run this program
-consult('path').
+consult('path').     -- Save extension as pl
 init.
 s.
 h(2,2).    -- Player Move
