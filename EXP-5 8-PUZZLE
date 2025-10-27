@@ -1,221 +1,154 @@
-%problem specific part
+/* ============================
+   8-Puzzle Solver (A* Search)
+   Cleaned & Organized Version
+   ============================ */
 
-%move blank cell right
+:- discontiguous move/2.
 
-%S is current state
+/* ---------- MOVE OPERATORS ---------- */
 
-%Snew is next state
+% General move operator that connects to direction-specific rules
+move(S, Snew) :- right(S, Snew).
+move(S, Snew) :- left(S, Snew).
+move(S, Snew) :- up(S, Snew).
+move(S, Snew) :- down(S, Snew).
 
-%the same is in left, up, down.
+/* ---------- MOVE RIGHT ---------- */
+right([R1,R2,R3,R4,R5,R6,R7,R8,R9], Snew) :-
+    R3 > 0, R6 > 0, R9 > 0,
+    blank_right([R1,R2,R3,R4,R5,R6,R7,R8,R9], Snew).
 
-move(S,Snew):-
-      right(S,Snew).
+blank_right(State, S) :-
+    nth0(N, State, 0),
+    Z is N + 1,
+    nth0(Z, State, R),
+    substitute(R, State, 10, Q),
+    substitute(0, Q, R, V),
+    substitute(10, V, 0, S).
 
-%move blank cell right
+/* ---------- MOVE LEFT ---------- */
+left([R1,R2,R3,R4,R5,R6,R7,R8,R9], Snew) :-
+    R1 > 0, R4 > 0, R7 > 0,
+    blank_left([R1,R2,R3,R4,R5,R6,R7,R8,R9], Snew).
 
-%first parameter is current state
+blank_left(State, S) :-
+    nth0(N, State, 0),
+    Z is N - 1,
+    nth0(Z, State, R),
+    substitute(R, State, 10, Q),
+    substitute(0, Q, R, V),
+    substitute(10, V, 0, S).
 
-%Snew is next state
+/* ---------- MOVE DOWN ---------- */
+down([R1,R2,R3,R4,R5,R6,R7,R8,R9], Snew) :-
+    R7 > 0, R8 > 0, R9 > 0,
+    blank_down([R1,R2,R3,R4,R5,R6,R7,R8,R9], Snew).
 
-right([R1,R2,R3,R4,R5,R6,R7,R8,R9],Snew):-
-      R3>0,
-      R6>0,
-      R9>0,
-      blank_right([R1,R2,R3,R4,R5,R6,R7,R8,R9],Snew).
+blank_down(State, S) :-
+    nth0(N, State, 0),
+    Z is N + 3,
+    nth0(Z, State, R),
+    substitute(R, State, 10, Q),
+    substitute(0, Q, R, V),
+    substitute(10, V, 0, S).
 
-%move blank cell right
-%first parameter is current state
+/* ---------- MOVE UP ---------- */
+up([R1,R2,R3,R4,R5,R6,R7,R8,R9], Snew) :-
+    R1 > 0, R2 > 0, R3 > 0,
+    blank_up([R1,R2,R3,R4,R5,R6,R7,R8,R9], Snew).
 
-%Snew is next state
-blank_right([R1,R2,R3,R4,R5,R6,R7,R8,R9],S):-
-      nth0(N,[R1,R2,R3,R4,R5,R6,R7,R8,R9],0),
-      Z is N+1,
-     nth0(Z,[R1,R2,R3,R4,R5,R6,R7,R8,R9],R),
-      substitute(R,[R1,R2,R3,R4,R5,R6,R7,R8,R9],10,Q),
-      substitute(0,Q,R,V),
-      substitute(10,V,0,S).
+blank_up(State, S) :-
+    nth0(N, State, 0),
+    Z is N - 3,
+    nth0(Z, State, R),
+    substitute(R, State, 10, Q),
+    substitute(0, Q, R, V),
+    substitute(10, V, 0, S).
 
-move(S,Snew):-
-      left(S,Snew).
-left([R1,R2,R3,R4,R5,R6,R7,R8,R9],Snew):-
-      R1>0,
-      R4>0,
-      R7>0,
-      blank_left([R1,R2,R3,R4,R5,R6,R7,R8,R9],Snew).
+/* ---------- SUBSTITUTE ---------- */
+substitute(_, [], _, []) :- !.
+substitute(X, [X|T], Y, [Y|T1]) :- substitute(X, T, Y, T1), !.
+substitute(X, [Y|T], Y, [X|T1]) :- substitute(X, T, Y, T1), !.
+substitute(X, [H|T], Y, [H|T1]) :- substitute(X, T, Y, T1).
 
-blank_left([R1,R2,R3,R4,R5,R6,R7,R8,R9],S):-
-      nth0(N,[R1,R2,R3,R4,R5,R6,R7,R8,R9],0),
-      Z is N-1,
-      nth0(Z,[R1,R2,R3,R4,R5,R6,R7,R8,R9],R),
-      substitute(R,[R1,R2,R3,R4,R5,R6,R7,R8,R9],10,Q),
-      substitute(0,Q,R,V),
-      substitute(10,V,0,S).
+/* ---------- A* SEARCH ALGORITHM ---------- */
+go(Start, Goal) :-
+    getHeuristic(Start, H, Goal),
+    path([[Start, null, 0, H, H]], [], Goal).
 
-move(S,Snew):-
-      down(S,Snew).
-down([R1,R2,R3,R4,R5,R6,R7,R8,R9],Snew):-
-      R7>0,
-      R8>0,
-      R9>0,
-      blank_down([R1,R2,R3,R4,R5,R6,R7,R8,R9],Snew).
+path([], _, _) :-
+    write('No solution'), nl, !.
 
-blank_down([R1,R2,R3,R4,R5,R6,R7,R8,R9],S):-
-      nth0(N,[R1,R2,R3,R4,R5,R6,R7,R8,R9],0),
-      Z is N+3,
-      nth0(Z,[R1,R2,R3,R4,R5,R6,R7,R8,R9],R),
-      substitute(R,[R1,R2,R3,R4,R5,R6,R7,R8,R9],10,Q),
-      substitute(0,Q,R,V),
-      substitute(10,V,0,S).
+path(Open, Closed, Goal) :-
+    getBestChild(Open, [Goal, Parent, PC, H, TC], _),
+    write('A solution is found'), nl,
+    printsolution([Goal, Parent, PC, H, TC], Closed), !.
 
-move(S,Snew):-
-      up(S,Snew).
+path(Open, Closed, Goal) :-
+    getBestChild(Open, [State, Parent, PC, H, TC], RestOpen),
+    getchildren(State, Open, Closed, Children, PC, Goal),
+    addListToOpen(Children, RestOpen, NewOpen),
+    path(NewOpen, [[State, Parent, PC, H, TC] | Closed], Goal).
 
-up([R1,R2,R3,R4,R5,R6,R7,R8,R9],Snew):-
-      R1>0,
-      R2>0,
-      R3>0,
-      blank_up([R1,R2,R3,R4,R5,R6,R7,R8,R9],Snew).
-blank_up([R1,R2,R3,R4,R5,R6,R7,R8,R9],S):-
+/* ---------- CHILDREN GENERATION ---------- */
+getchildren(State, Open, Closed, Children, PC, Goal) :-
+    bagof(X, moves(State, Open, Closed, X, PC, Goal), Children), !.
+getchildren(_, _, _, [], _, _).
 
-% get position of blank cell
-      nth0(N,[R1,R2,R3,R4,R5,R6,R7,R8,R9],0),
-      Z is N-3,
-
-% get element in pos Z
-      nth0(Z,[R1,R2,R3,R4,R5,R6,R7,R8,R9],R),
-
-%substitute element of pos Z with blank cell “0”
-      substitute(R,[R1,R2,R3,R4,R5,R6,R7,R8,R9],10,Q),
-      substitute(0,Q,R,V),
-      substitute(10,V,0,S).
-
-
-
-%substitutes the first parameter with the third parameter and the third parameter with the first parameter in the second parameter (list) and produces a new list (forth parameter).
-
-%e.g. substitute(1, [1,2,3,1,4], 4, X) will make X=[4,2,3,4,1]
-
-%first parameter is value to be substituted by third parameter or replaces it.
-
-%second parameter is the given list to be substituted.
-
-%third parameter is the value that will replace the first parameter or will be substituted by the first parameter
-
-%forth parameter is the new list after substitution.
-substitute(_, [], _, []):-!.
-substitute(X, [X|T], Y, [Y|T1]):-
-   substitute(X, T, Y, T1),!.
-substitute(X, [Y|T], Y, [X|T1]):-
-   substitute(X, T, Y, T1),!.
-substitute(X, [H|T], Y, [H|T1]):-
-   substitute(X, T, Y, T1).
-% end of specific part
-%general algorithm
-%query of user and takes start state and next state
-go(Start,Goal):-
-       getHeuristic(Start, H, Goal),
-       path([[Start,null, 0, H, H]],[],Goal).%open, closed, goal, path_cost, heuristic, total cost
-
-
-
-%main predicate that takes open list, closed list and goal state
-
-path([], _, _):-
-       write('No solution'),nl,!.
-path(Open, Closed, Goal):-
-       getBestChild(Open, [Goal, Parent, PC, H, TC], RestOfOpen),
-       write('A solution is found'),  nl ,
-       printsolution([Goal,Parent, PC, H, TC], Closed),!.
-
-path(Open, Closed, Goal):-
-       getBestChild(Open, [State, Parent, PC, H, TC], RestOfOpen),
-       getchildren(State, Open, Closed, Children, PC, Goal),
-       addListToOpen(Children , RestOfOpen, NewOpen),
-       path(NewOpen, [[State, Parent, PC, H, TC] | Closed], Goal).
-
-
-
-%gets Children of State that aren't in Open or Close
-getchildren(State, Open ,Closed , Children, PC, Goal):-
-       bagof(X, moves( State, Open, Closed, X, PC, Goal), Children) .
-getchildren(_,_,_, [],_,_).
-
-%adds children to open list (without best child) to form new open list
 addListToOpen(Children, [], Children).
-addListToOpen(Children, [H|Open], [H|NewOpen]):-
-       addListToOpen(Children, Open, NewOpen).
+addListToOpen(Children, [H|Open], [H|NewOpen]) :-
+    addListToOpen(Children, Open, NewOpen).
 
-
-
-%gets the best state of the open list and another list without this best state
-
-%first parameter is the open list
-
-%second parameter is the best child
-
-%third parameter is the open list without the best child
+/* ---------- BEST NODE SELECTION ---------- */
 getBestChild([Child], Child, []).
-
-getBestChild(Open, Best, RestOpen):-
-   getBestChild1(Open, Best),
-   removeFromList(Best, Open, RestOpen).
-
-%gets the best state of the open list
+getBestChild(Open, Best, RestOpen) :-
+    getBestChild1(Open, Best),
+    removeFromList(Best, Open, RestOpen).
 
 getBestChild1([State], State).
+getBestChild1([State|Rest], Best) :-
+    getBestChild1(Rest, Temp),
+    getBest(State, Temp, Best).
 
-getBestChild1([State|Rest], Best):-
-   getBestChild1(Rest, Temp),
-   getBest(State, Temp, Best).
-
-
-
-%compares two states with each other (according to their Total cost) and returns the state with lower total cost TC
-
-getBest([State, Parent, PC, H, TC], [_, _, _, _, TC1], [State, Parent, PC, H, TC]):-
-   TC < TC1, !.
-
-getBest([_, _, _, _, _], [State1, Parent1, PC1, H1, TC1], [State1, Parent1, PC1, H1, TC1]).
-
-
-
-%removes an element (usually the best state) from a list (open list) and returns a new list
+getBest([State, Parent, PC, H, TC], [_, _, _, _, TC1], [State, Parent, PC, H, TC]) :-
+    TC < TC1, !.
+getBest(_, [State1, Parent1, PC1, H1, TC1], [State1, Parent1, PC1, H1, TC1]).
 
 removeFromList(_, [], []).
+removeFromList(H, [H|T], V) :- !, removeFromList(H, T, V).
+removeFromList(H, [H1|T], [H1|T1]) :- removeFromList(H, T, T1).
 
-removeFromList(H, [H|T], V):-
-   !, removeFromList(H, T, V).
+/* ---------- MOVE GENERATION ---------- */
+moves(State, Open, Closed, [Next, State, NPC, H, TC], PC, Goal) :-
+    move(State, Next),
+    \+ member([Next, _, _, _, _], Open),
+    \+ member([Next, _, _, _, _], Closed),
+    NPC is PC + 1,
+    getHeuristic(Next, H, Goal),
+    TC is NPC + H.
 
-removeFromList(H, [H1|T], [H1|T1]):-
-   removeFromList(H, T, T1).
+/* ---------- HEURISTIC ---------- */
+getHeuristic([], 0, []) :- !.
+getHeuristic([H|T1], V, [H|T2]) :- !, getHeuristic(T1, V, T2).
+getHeuristic([_|T1], H, [_|T2]) :-
+    getHeuristic(T1, TH, T2),
+    H is TH + 1.
+
+/* ---------- SOLUTION PRINTING ---------- */
+printsolution([State, null, PC, H, TC], _) :-
+    write(State), write(' PC:'), write(PC), write(' H:'), write(H), write(' TC:'), write(TC), nl.
+
+printsolution([State, Parent, PC, H, TC], Closed) :-
+    member([Parent, GrandParent, PC1, H1, TC1], Closed),
+    printsolution([Parent, GrandParent, PC1, H1, TC1], Closed),
+    write(State), write(' !!PC:'), write(PC), write(' H:'), write(H), write(' TC:'), write(TC), nl.
+
+/* ---------- STATE PRINTING HELPER ---------- */
+print_state([A,B,C,D,E,F,G,H,I]) :-
+    format('~w ~w ~w~n~w ~w ~w~n~w ~w ~w~n~n', [A,B,C,D,E,F,G,H,I]).
 
 
+# Command to run the program
 
-%gets next state given the current state
-
-moves( State, Open, Closed,[Next,State, NPC, H, TC], PC, Goal):-
-       move(State,Next),
-       \+ member([Next, _, _, _, _],Open),
-       \+ member([Next, _, _, _, _],Closed),
-       NPC is PC + 1,
-       getHeuristic(Next, H, Goal),
-       TC is NPC + H.
-
-%calculate heuristic of some state
-
-%here it is calculated as number of misplaced numbers
-getHeuristic([], 0, []):-!.
-getHeuristic([H|T1],V,[H|T2]):-!,
-   getHeuristic(T1,V, T2).
-
-getHeuristic([_|T1],H,[_|T2]):-
-   getHeuristic(T1,TH, T2),
-   H is TH + 1.
-
-%prints the path from start state to goal state
-printsolution([State, null, PC, H, TC],_):-
-       write(State), write(' PC: '), write(PC), write(' H:'), write(H), write(' TC: '), write(TC), nl.
-
-printsolution([State, Parent, PC, H, TC], Closed):-
-       member([Parent, GrandParent, PC1, H1, TC1], Closed),
-       printsolution([Parent, GrandParent, PC1, H1, TC1], Closed),    write(Parent),    write(State), write(' !!PC: '), write(PC), write(' H:'), write(H), write(' TC: '), write(TC), nl.
+consult('path').
+go([1,2,3,4,0,6,7,5,8], [1,2,3,4,5,6,7,8,0]).
