@@ -1,0 +1,73 @@
+% -----------------------------
+% BLOCKS WORLD PLANNING AGENT
+% -----------------------------
+
+initial_state([
+    on(a, table),
+    on(b, table),
+    on(c, a),
+    clear(b),
+    clear(c),
+    ontable(a),
+    ontable(b)
+]).
+
+goal_state([
+    on(a, b),
+    on(b, table),
+    on(c, table)
+]).
+
+% -----------------------------
+% Actions
+% -----------------------------
+action(move(X, From, To),
+    [on(X, From), clear(X), clear(To)],
+    [on(X, To), clear(From)],
+    [on(X, From), clear(To)]
+).
+
+action(move_to_block(X, To),
+    [ontable(X), clear(X), clear(To)],
+    [on(X, To)],
+    [ontable(X), clear(To)]
+).
+
+action(move_to_table(X, From),
+    [on(X, From), clear(X)],
+    [ontable(X), clear(From)],
+    [on(X, From)]
+).
+
+% -----------------------------
+% Helpers
+% -----------------------------
+holds_all([], _).
+holds_all([Cond|Rest], State) :-
+    member(Cond, State),
+    holds_all(Rest, State).
+
+apply_action(Action, State, NewState) :-
+    action(Action, Preconditions, AddList, DelList),
+    holds_all(Preconditions, State),
+    subtract(State, DelList, Temp),
+    union(Temp, AddList, NewState).
+
+% -----------------------------
+% Planner core
+% -----------------------------
+plan(State, Goal, _, []) :-
+    holds_all(Goal, State).
+
+plan(State, Goal, History, [Action|Rest]) :-
+    apply_action(Action, State, NewState),
+    \+ member(NewState, History),
+    plan(NewState, Goal, [NewState|History], Rest).
+
+
+
+
+
+# Command to run the code
+consult('path').
+solve(Plan).
