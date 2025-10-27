@@ -52,3 +52,6 @@ plan(Plan) :-
 
  
 
+# Command to run the code
+consult('path').
+plan(Plan).
