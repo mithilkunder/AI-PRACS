@@ -1,0 +1,35 @@
+import numpy as np
+
+# Probabilities
+P_R = 0.2                      # P(Rain = True)
+P_S_given_R = {True: 0.01, False: 0.4}   # P(Sprinkler = True | Rain)
+P_W_given_RS = {
+    (True, True): 0.99,        # P(WetGrass = True | Rain, Sprinkler)
+    (True, False): 0.8,
+    (False, True): 0.9,
+    (False, False): 0.0
+}
+
+# Function to compute joint probability
+def joint_probability(r, s, w):
+    P_r = P_R if r else 1 - P_R
+    P_s = P_S_given_R[r] if s else 1 - P_S_given_R[r]
+    P_w = P_W_given_RS[(r, s)] if w else 1 - P_W_given_RS[(r, s)]
+    return P_r * P_s * P_w
+
+# Compute P(WetGrass = True)
+P_W = 0
+for r in [True, False]:
+    for s in [True, False]:
+        P_W += joint_probability(r, s, True)
+
+print("P(WetGrass = True) =", round(P_W, 4))
+
+# Compute P(Rain = True | WetGrass = True)
+# = P(R=True, W=True) / P(W=True)
+num = 0
+for s in [True, False]:
+    num += joint_probability(True, s, True)
+P_R_given_W = num / P_W
+
+print("P(Rain = True | WetGrass = True) =", round(P_R_given_W, 4))
