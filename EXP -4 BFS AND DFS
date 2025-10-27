@@ -1,4 +1,4 @@
-% Sample graph represented by facts.
+% ---------- Graph definition ----------
 edge(a, b).
 edge(a, c).
 edge(b, d).
@@ -8,25 +8,36 @@ edge(c, g).
 edge(d, h).
 edge(d, i).
 
-% BFS predicate
+% ---------- BFS algorithm ----------
 bfs(Start, Goal) :-
     bfs_queue([[Start]], Goal).
+
 bfs_queue([[Goal|Path]|_], Goal) :-  % Goal found
     reverse([Goal|Path], Solution),
     write('Solution: '), write(Solution), nl.
+
 bfs_queue([Path|Paths], Goal) :-
     extend(Path, NewPaths),
     append(Paths, NewPaths, UpdatedPaths),
     bfs_queue(UpdatedPaths, Goal).
+
 extend([Node|Path], NewPaths) :-
     findall([NewNode, Node|Path],
-            (edge(Node, NewNode), \+ member(NewNode, [Node|Path])),
+            (edge(Node, NewNode),
+             \+ member(NewNode, [Node|Path])),
             NewPaths),
-    !. % Cut to prevent backtracking
-extend(_, []). % No more extensions
+    !. % cut to stop unnecessary backtracking
 
-% Sample usage:
-% ?- bfs(a, f)
+extend(_, []). % no more extensions
+
+
+# Command to run this program
+consult('path').
+bfs(a, h).
+bfs(a, g).
+bfs(a, i).
+bfs(c, e).  --false
+
 
 
 Code for Dfs:-
@@ -42,7 +53,7 @@ dfs(Start, End, Path) :-
     dfs_helper(Start, End, [], Path).
 
 % Base case: Reached the destination
-dfs_helper(Node, Node, Visited, [Node|Visited]).
+dfs_helper(Node, Node, Visited, [Node|Visited]) :- !.
 
 % Recursive case: Traverse to adjacent nodes
 dfs_helper(Current, End, Visited, Path) :-
@@ -54,4 +65,13 @@ dfs_helper(Current, End, Visited, Path) :-
 dfs_start(Start, End) :-
     dfs(Start, End, Path),
     reverse(Path, PathReversed),
-    format("DFS path from ~w to ~w: ~w", [Start, End, PathReversed]).
+    format("DFS path from ~w to ~w: ~w~n", [Start, End, PathReversed]).
+
+
+# Command to run this program
+consult('path').
+dfs_start(a, f).
+dfs_start(a, e).
+dfs_start(a, d).
+dfs_start(e, a).  -- false
+dfs_start(d, f).  -- false
