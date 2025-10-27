@@ -16,7 +16,7 @@ generate_neighbor(State, Neighbor) :-
     permutation([Y|Rest], Neighbor). % Generate Neighbor with Y in place of X
 
 % Hill climbing algorithm
-hill_climb(State, BestState) :-
+hill_climb(_, BestState) :-
     initial_state(CurrentState),
     hill_climb(CurrentState, 0, BestState).
 
@@ -26,7 +26,7 @@ hill_climb(State, _, State) :-
     \+ generate_neighbor(State, _), % No better neighbors found
     write('Optimal solution found: '), write(State), write(' with value '), write(Value), nl.
 
-hill_climb(State, PrevValue, BestState) :-
+hill_climb(State, _, BestState) :-
     evaluate(State, Value),
     write('Current state: '), write(State), write(' with value '), write(Value), nl,
     generate_neighbor(State, Neighbor),
@@ -38,3 +38,8 @@ hill_climb(State, PrevValue, BestState) :-
         write('No better neighbors, stopping.'), nl,
         BestState = State
     ).
+
+
+# Command to run this program
+
+hill_climb(State, BestState).
