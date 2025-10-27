@@ -172,3 +172,11 @@ mark(X) :-
 mark(X) :- 
    \+var(X),
    write(X).
+
+
+# Commands to run this program
+consult('path').
+init.
+s.
+h(2,2).    -- Player Move
+c.         -- Computer Move
