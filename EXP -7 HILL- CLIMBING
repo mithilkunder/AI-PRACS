@@ -42,4 +42,5 @@ hill_climb(State, _, BestState) :-
 
 # Command to run this program
 
+consult('path').
 hill_climb(State, BestState).
