@@ -1,47 +1,46 @@
-% -----------------------------
-% BLOCKS WORLD PLANNING AGENT
-% -----------------------------
+% ==============================================
+% BLOCKS WORLD PLANNING AGENT (DFS + Depth Limit)
+% ==============================================
 
+% ---------- INITIAL STATE ----------
 initial_state([
     on(a, table),
     on(b, table),
     on(c, a),
     clear(b),
-    clear(c),
-    ontable(a),
-    ontable(b)
+    clear(c)
 ]).
 
+% ---------- GOAL STATE ----------
 goal_state([
     on(a, b),
     on(b, table),
     on(c, table)
 ]).
 
-% -----------------------------
-% Actions
-% -----------------------------
+% ---------- ACTION DEFINITIONS ----------
+% move(X, From, To)
 action(move(X, From, To),
-    [on(X, From), clear(X), clear(To)],
-    [on(X, To), clear(From)],
-    [on(X, From), clear(To)]
+    [on(X, From), clear(X), clear(To)],   % Preconditions
+    [on(X, To), clear(From)],             % Add list
+    [on(X, From), clear(To)]              % Delete list
 ).
 
-action(move_to_block(X, To),
-    [ontable(X), clear(X), clear(To)],
-    [on(X, To)],
-    [ontable(X), clear(To)]
-).
-
+% move_to_table(X, From)
 action(move_to_table(X, From),
-    [on(X, From), clear(X)],
-    [ontable(X), clear(From)],
-    [on(X, From)]
+    [on(X, From), clear(X)],              % Preconditions
+    [ontable(X), clear(From)],            % Add list
+    [on(X, From)]                         % Delete list
 ).
 
-% -----------------------------
-% Helpers
-% -----------------------------
+% move_from_table(X, To)
+action(move_from_table(X, To),
+    [ontable(X), clear(X), clear(To)],    % Preconditions
+    [on(X, To)],                          % Add list
+    [ontable(X), clear(To)]               % Delete list
+).
+
+% ---------- HELPER RULES ----------
 holds_all([], _).
 holds_all([Cond|Rest], State) :-
     member(Cond, State),
@@ -53,17 +52,25 @@ apply_action(Action, State, NewState) :-
     subtract(State, DelList, Temp),
     union(Temp, AddList, NewState).
 
-% -----------------------------
-% Planner core
-% -----------------------------
-plan(State, Goal, _, []) :-
-    holds_all(Goal, State).
+% ---------- PLANNING ALGORITHM ----------
+plan(State, Goal, _, [], _) :-
+    holds_all(Goal, State), !.
 
-plan(State, Goal, History, [Action|Rest]) :-
+plan(State, Goal, History, [Action|Rest], Depth) :-
+    Depth > 0,
     apply_action(Action, State, NewState),
     \+ member(NewState, History),
-    plan(NewState, Goal, [NewState|History], Rest).
+    NewDepth is Depth - 1,
+    plan(NewState, Goal, [NewState|History], Rest, NewDepth).
 
+% ---------- MAIN PREDICATE ----------
+solve(Plan) :-
+    initial_state(Init),
+    goal_state(Goal),
+    MaxDepth = 6,  % limit depth (to avoid infinite loops)
+    plan(Init, Goal, [Init], Plan, MaxDepth),
+    nl, write('Plan found:'), nl,
+    write(Plan), nl.
 
 
 
