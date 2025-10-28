@@ -1,0 +1,26 @@
+% Define some facts 
+bird(sparrow). 
+bird(eagle). 
+mammal(cat). 
+mammal(dog). 
+% Define rules 
+can_fly(X) :- bird(X). 
+has_fur(X) :- mammal(X).
+
+
+% Query to perform forward chaining 
+ can_fly(X).
+
+
+
+% Define some facts 
+parent(john, mary). 
+parent(john, lisa). 
+parent(mary, ann). 
+parent(lisa, pat). 
+% Define rules 
+ancestor(X, Y) :- parent(X, Y). 
+ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
+
+% Query using backward chaining 
+ancestor(john, pat).
