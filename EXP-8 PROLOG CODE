@@ -9,7 +9,15 @@ has_fur(X) :- mammal(X).
 
 
 % Query to perform forward chaining 
- can_fly(X).
+
+bird(sparrow).
+mammal(dog).
+bird(cat).
+can_fly(X).
+can_fly(eagle).
+has_fur(X).
+has_fur(sparrow).
+can_fly(X); has_fur(X).
 
 
 
@@ -24,3 +32,5 @@ ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
 
 % Query using backward chaining 
 ancestor(john, pat).
+ancestor(mary, pat).  -- false
+ancestor(X, ann).  -- use semicolon
